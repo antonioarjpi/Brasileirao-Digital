@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank;
 
 @Entity
 @NoArgsConstructor @Data
-public class Jogo {
+public class Match {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,12 +17,12 @@ public class Jogo {
     @NotBlank
     @ManyToOne
     @JoinColumn(name = "home_id")
-    private Time home;
+    private Team home;
 
     @NotBlank
     @ManyToOne
     @JoinColumn(name = "visited_id")
-    private Time visited;
+    private Team visited;
 
     private Integer goalsHome;
     private Integer goalsVisited;

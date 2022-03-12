@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank;
 
 @Entity
 @Data @NoArgsConstructor
-public class Time {
+public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

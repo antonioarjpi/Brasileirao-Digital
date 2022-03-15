@@ -18,7 +18,7 @@ public class TeamService {
 
     private TeamRepository teamRepository;
 
-    private Team modelToDto(TeamDTO teamDTO){
+    public Team modelToDto(TeamDTO teamDTO){
         Team team = new Team();
         team.setId(teamDTO.getId());
         team.setName(teamDTO.getName());
@@ -27,7 +27,7 @@ public class TeamService {
         return team;
     }
 
-    private TeamDTO dtoToModel(Team team){
+    public TeamDTO dtoToModel(Team team){
         TeamDTO teamDTO = new TeamDTO();
         teamDTO.setId(team.getId());
         teamDTO.setName(team.getName());

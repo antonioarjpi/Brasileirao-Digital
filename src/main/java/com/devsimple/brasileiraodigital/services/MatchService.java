@@ -1,5 +1,6 @@
 package com.devsimple.brasileiraodigital.services;
 
+import com.devsimple.brasileiraodigital.dto.MatchDTO;
 import com.devsimple.brasileiraodigital.model.Match;
 import com.devsimple.brasileiraodigital.model.Team;
 import com.devsimple.brasileiraodigital.repository.MatchRepository;
@@ -11,6 +12,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -19,6 +22,27 @@ public class MatchService {
     private MatchRepository matchRepository;
     private TeamRepository teamRepository;
     private TeamService teamService;
+
+    public List<MatchDTO> findAll(){
+        return matchRepository.findAll()
+                .stream()
+                .map(x -> modelToDTO(x))
+                .collect(Collectors.toList());
+    }
+
+    public MatchDTO modelToDTO(Match match) {
+       MatchDTO matchDTO = new MatchDTO();
+       matchDTO.setId(match.getId());
+       matchDTO.setDate(match.getDate());
+       matchDTO.setStadium(match.getTeam1().getStadium());
+       matchDTO.setFinished(match.getFinished());
+       matchDTO.setGoalsHome(match.getGoalsHome());
+       matchDTO.setGoalsVisited(match.getGoalsVisited());
+       matchDTO.setRound(match.getRound());
+       matchDTO.setHome(match.getTeam1().getName());
+       matchDTO.setVisited(match.getTeam2().getName());
+       return matchDTO;
+    }
 
     public void generateMatch(LocalDateTime roundOne, List<LocalDate> dateInvalid){
         final List<Team> teams = teamRepository.findAll();
@@ -73,17 +97,17 @@ public class MatchService {
 
     }
 
-    private Match generateMatch(LocalDateTime dayMatch, Integer round, Team team1, Team team2) {
+    public Match generateMatch(LocalDateTime dayMatch, Integer round, Team team1, Team team2) {
         Match match = new Match();
+        Random random = new Random();
         match.setTeam1(team1);
         match.setTeam2(team2);
         match.setDate(dayMatch);
         match.setRound(round);
-        match.setGoalsHome(2);
-        match.setGoalsVisited(1);
+        match.setGoalsHome(random.nextInt(5));
+        match.setGoalsVisited(random.nextInt(5));
         match.setFinished(false);
         return match;
     }
-
 
 }

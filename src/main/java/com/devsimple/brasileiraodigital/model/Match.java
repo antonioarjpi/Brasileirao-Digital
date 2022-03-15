@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor @Data
@@ -14,16 +15,17 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     @ManyToOne
     @JoinColumn(name = "home_id")
-    private Team home;
+    private Team team1;
 
-    @NotBlank
     @ManyToOne
     @JoinColumn(name = "visited_id")
-    private Team visited;
+    private Team team2;
 
+    private Boolean finished;
+    private LocalDateTime date;
+    private Integer round;
     private Integer goalsHome;
     private Integer goalsVisited;
 

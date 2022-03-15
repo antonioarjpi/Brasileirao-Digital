@@ -1,5 +1,6 @@
 package com.devsimple.brasileiraodigital.controller;
 
+import com.devsimple.brasileiraodigital.dto.TeamDTO;
 import com.devsimple.brasileiraodigital.model.Team;
 import com.devsimple.brasileiraodigital.services.TeamService;
 import io.swagger.annotations.ApiOperation;
@@ -18,20 +19,21 @@ public class TeamController {
 
     @ApiOperation("Listando todos os times! ")
     @GetMapping
-    public ResponseEntity<List<Team>> listAll(){
-        List<Team> team = teamService.listAll();
-        return ResponseEntity.ok(team);
+    public ResponseEntity<List<TeamDTO>> listAll(){
+        return ResponseEntity.ok().body(teamService.listAll());
     }
 
     @ApiOperation("Salvando os times no banco! ")
     @PostMapping
-    public Team save(@RequestBody Team team){
-        return teamService.save(team);
+    public ResponseEntity<Team> save(@RequestBody TeamDTO teamDTO){
+        teamService.save(teamDTO);
+        return ResponseEntity.ok().build();
     }
 
     @ApiOperation("Obtendo um time pela URI! ")
     @GetMapping("/{id}")
     public ResponseEntity<Team> findById(@PathVariable Long id){
-        return ResponseEntity.ok().body(teamService.findById(id));
+        Team team = teamService.findById(id);
+        return ResponseEntity.ok().body(team);
     }
 }

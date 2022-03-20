@@ -5,9 +5,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-public class MatchDTO {
+@Data @NoArgsConstructor
+public class EndMatchDTO {
 
     private Long partida;
     private String home;

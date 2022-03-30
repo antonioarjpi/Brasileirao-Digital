@@ -1,6 +1,6 @@
 package com.devsimple.brasileiraodigital.controller;
 
-import com.devsimple.brasileiraodigital.dto.EndMatchDTO;
+import com.devsimple.brasileiraodigital.dto.ClassificationDTO;
 import com.devsimple.brasileiraodigital.dto.MatchDTO;
 import com.devsimple.brasileiraodigital.services.MatchService;
 import io.swagger.annotations.ApiOperation;
@@ -44,11 +44,11 @@ public class MatchController {
         return ResponseEntity.ok().body(matchService.endMatch(id));
     }
 
-//    @ApiOperation(value = "Classificação")
-//    @GetMapping("/standings")
-//    public ResponseEntity<MatchDTO> standings(){
-//        return ResponseEntity.ok().body(matchService.standings());
-//    }
+    @ApiOperation(value = "Classificação")
+    @GetMapping("/standings")
+    public ResponseEntity<ClassificationDTO> standings(){
+        return ResponseEntity.ok().body(matchService.findStandings());
+    }
 
 
 

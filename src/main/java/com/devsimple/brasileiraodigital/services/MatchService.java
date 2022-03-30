@@ -1,5 +1,6 @@
 package com.devsimple.brasileiraodigital.services;
 
+import com.devsimple.brasileiraodigital.dto.ClassificationDTO;
 import com.devsimple.brasileiraodigital.dto.MatchDTO;
 import com.devsimple.brasileiraodigital.dto.StandingsDTO;
 import com.devsimple.brasileiraodigital.model.Match;
@@ -12,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -49,13 +47,13 @@ public class MatchService {
     }
 
     public void generateMatches(LocalDateTime roundOne, List<LocalDate> dateInvalid){
-        final List<Team> teams = teamRepository.findAll(); //recupera todos os times
+        final List<Team> teams = teamRepository.findAll();
 
-        List<Team> teamOne = new ArrayList<>(); //lista times do primeiro turno
-        List<Team> teamTwo = new ArrayList<>(); //lista times do segundo turno
+        List<Team> teamOne = new ArrayList<>();
+        List<Team> teamTwo = new ArrayList<>();
 
-        teamOne.addAll(teams); //adiciona os times no primeiro turno
-        teamTwo.addAll(teams); //adiciona os times no segundo turno
+        teamOne.addAll(teams);
+        teamTwo.addAll(teams);
 
         matchRepository.deleteAll();
 
@@ -68,7 +66,6 @@ public class MatchService {
         for (int i = 0; i < t - 1; i++) {
             round = i + 1;
             for (int j = 0; j < m; j++) {
-                //Teste para ajustar o mando de campo
                 Team time1;
                 Team time2;
                 if (j % 2 == 1 || i % 2 == 1 && j == 0) {
@@ -84,7 +81,7 @@ public class MatchService {
                 matches.add(generateMatch(matchDate, round, time1, time2));
                 matchDate = matchDate.plusDays(7);
             }
-            teams.add(1, teams.remove(teams.size() -1)); //gira s times, mantendo o primeiro lugar
+            teams.add(1, teams.remove(teams.size() -1));
         }
 
         matches.forEach(match -> System.out.println(match));
@@ -133,14 +130,14 @@ public class MatchService {
         }
     }
 
-    public StandingsDTO findStandings() {
-        StandingsDTO standingsDTO = new StandingsDTO();
+    public ClassificationDTO findStandings() {
+        ClassificationDTO classificationDTO = new ClassificationDTO();
 
         final List<Team> teams = teamRepository.findAll();
-
         teams.forEach(team -> {
-            final List<Match> matchHome = matchRepository.findTeamOneAndFinished(team, true);
-            final List<Match> matchVisited = matchRepository.findTeamTwoAndFinished(team, true);
+            final List<Match> matchHome = matchRepository.findByTeam1AndFinished(team, true);
+            final List<Match> matchVisited = matchRepository.findByTeam2AndFinished(team, true);
+
             AtomicReference<Integer> win = new AtomicReference<>(0);
             AtomicReference<Integer> defeat = new AtomicReference<>(0);
             AtomicReference<Integer> draws = new AtomicReference<>(0);
@@ -148,10 +145,9 @@ public class MatchService {
             AtomicReference<Integer> goalsAllowed = new AtomicReference<>(0);
 
             matchHome.forEach(match -> {
-                if (match.getGoalsHome() < match.getGoalsVisited()){
-                    win.getAndSet(win.get() + 1);
-                }
                 if (match.getGoalsHome() > match.getGoalsVisited()){
+                    win.getAndSet(win.get() + 1);
+                } else if (match.getGoalsHome() < match.getGoalsVisited()){
                     defeat.getAndSet(defeat.get() + 1);
                 }else {
                     draws.getAndSet(draws.get() + 1);
@@ -160,8 +156,38 @@ public class MatchService {
                 goalsAllowed.set(goalsAllowed.get() + match.getGoalsVisited());
             });
 
+            matchVisited.forEach(match -> {
+                if (match.getGoalsVisited() > match.getGoalsHome()){
+                    win.getAndSet(win.get() + 1);
+                } else if (match.getGoalsVisited() < match.getGoalsHome()){
+                    defeat.getAndSet(defeat.get() + 1);
+                }else {
+                    draws.getAndSet(draws.get() + 1);
+                }
+                goals.set(goals.get() + match.getGoalsHome());
+                goalsAllowed.set(goalsAllowed.get() + match.getGoalsVisited());
+            });
+
+            StandingsDTO standingsDTO = new StandingsDTO();
+            standingsDTO.setDraws(draws.get());
+            standingsDTO.setWins(win.get());
+            standingsDTO.setDefeat(defeat.get());
+            standingsDTO.setGamesPlayed(draws.get() + defeat.get() + win.get());
+            standingsDTO.setGoals(goals.get());
+            standingsDTO.setGoalsAllowed(goalsAllowed.get());
+            standingsDTO.setPoints((win.get() * 3) + draws.get());
+            standingsDTO.setId(team.getId());
+            standingsDTO.setTeam(team.getName());
+            classificationDTO.getTeams().add(standingsDTO);
+
         });
 
+        Collections.sort(classificationDTO.getTeams(), Collections.reverseOrder());
+        int rank = 1;
+        for (StandingsDTO team : classificationDTO.getTeams()){
+            team.setRank(rank++);
+        }
+        return classificationDTO;
 
     }
 }

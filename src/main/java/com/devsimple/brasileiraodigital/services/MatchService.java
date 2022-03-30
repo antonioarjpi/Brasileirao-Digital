@@ -1,6 +1,7 @@
 package com.devsimple.brasileiraodigital.services;
 
 import com.devsimple.brasileiraodigital.dto.MatchDTO;
+import com.devsimple.brasileiraodigital.dto.StandingsDTO;
 import com.devsimple.brasileiraodigital.model.Match;
 import com.devsimple.brasileiraodigital.model.Team;
 import com.devsimple.brasileiraodigital.repository.MatchRepository;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,6 +133,35 @@ public class MatchService {
         }
     }
 
-//    public Object standings() {
-//    }
+    public StandingsDTO findStandings() {
+        StandingsDTO standingsDTO = new StandingsDTO();
+
+        final List<Team> teams = teamRepository.findAll();
+
+        teams.forEach(team -> {
+            final List<Match> matchHome = matchRepository.findTeamOneAndFinished(team, true);
+            final List<Match> matchVisited = matchRepository.findTeamTwoAndFinished(team, true);
+            AtomicReference<Integer> win = new AtomicReference<>(0);
+            AtomicReference<Integer> defeat = new AtomicReference<>(0);
+            AtomicReference<Integer> draws = new AtomicReference<>(0);
+            AtomicReference<Integer> goals = new AtomicReference<>(0);
+            AtomicReference<Integer> goalsAllowed = new AtomicReference<>(0);
+
+            matchHome.forEach(match -> {
+                if (match.getGoalsHome() < match.getGoalsVisited()){
+                    win.getAndSet(win.get() + 1);
+                }
+                if (match.getGoalsHome() > match.getGoalsVisited()){
+                    defeat.getAndSet(defeat.get() + 1);
+                }else {
+                    draws.getAndSet(draws.get() + 1);
+                }
+                goals.set(goals.get() + match.getGoalsHome());
+                goalsAllowed.set(goalsAllowed.get() + match.getGoalsVisited());
+            });
+
+        });
+
+
+    }
 }
